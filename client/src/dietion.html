@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack - Dietitian Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* A very dark blue-gray */
+        }
+        /* Custom scrollbar for a better look in dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; /* gray-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563; /* gray-600 */
+        }
+        .client-active {
+            background-color: #374151; /* gray-700 */
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #6366f1; /* indigo-500 */
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-200 antialiased">
+
+    <div class="flex h-screen bg-gray-900">
+        <!-- Client List Sidebar -->
+        <aside class="w-80 bg-gray-800 flex-shrink-0 flex flex-col">
+            <div class="flex items-center justify-center h-20 border-b border-gray-700">
+                <h1 class="text-2xl font-bold">My Clients</h1>
+            </div>
+            <div class="flex-grow overflow-y-auto">
+                <nav id="client-list" class="mt-4">
+                    <!-- Client items will be dynamically populated by JavaScript -->
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="flex-1 flex flex-col">
+            <!-- Chat Header -->
+            <header id="chat-header" class="flex items-center justify-between h-20 px-8 bg-gray-800 border-b border-gray-700">
+                <!-- Header content will be updated by JavaScript -->
+                 <div class="flex items-center">
+                    <img class="h-12 w-12 rounded-full object-cover" src="https://placehold.co/100x100/6366f1/white?text=S" alt="Client Avatar">
+                    <div class="ml-4">
+                        <h2 class="text-xl font-semibold text-white">Select a Client</h2>
+                        <p class="text-sm text-gray-400">No client selected</p>
+                    </div>
+                </div>
+                <div id="ai-features" class="hidden">
+                    <button id="generate-plan-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        Generate Meal Plan
+                    </button>
+                </div>
+            </header>
+
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-grow p-8 overflow-y-auto space-y-6">
+                <!-- Messages will be dynamically populated by JavaScript -->
+                <div class="flex items-center justify-center h-full">
+                    <p class="text-gray-500">Select a client from the list to start a conversation.</p>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <footer class="p-4 bg-gray-800 border-t border-gray-700">
+                <div id="loading-indicator" class="hidden text-center mb-2">
+                    <div class="loader inline-block"></div>
+                    <p class="text-sm text-gray-400 ml-2 inline-block">AI is thinking...</p>
+                </div>
+                <form id="message-form" class="flex items-center">
+                    <input type="text" id="message-input" placeholder="Type a message..." class="flex-grow bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400" disabled>
+                    <button id="send-button" type="submit" class="ml-4 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-lg transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Send
+                    </button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <!-- 
+    ================================================================
+    JAVASCRIPT LOGIC
+    Handles client selection, chat interface, and Gemini API calls.
+    ================================================================
+    -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MOCK DATA ---
+            const clients = [
+                { id: 1, name: 'Sophia Carter', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&h=100&auto=format&fit=crop', status: 'Online' },
+                { id: 2, name: 'John Doe', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&h=100&auto=format&fit=crop', status: 'Offline' },
+                { id: 3, name: 'Peter Jones', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=100&h=100&auto=format&fit=crop', status: 'Online' },
+            ];
+
+            const conversations = {
+                1: [
+                    { from: 'client', text: 'Hi Dr. Chloe, I want to improve my current diet and set some specific goals. Can you help?' },
+                    { from: 'dietitian', text: "Hi Sophia! I'd be happy to help. Let's start with your diet, as this will provide a solid foundation." },
+                    { from: 'client', text: "Great! What's the first step?" },
+                ],
+                2: [
+                    { from: 'client', text: 'Good morning, I had a question about my meal plan for today.' },
+                ],
+                3: [
+                    { from: 'dietitian', text: 'Hi Peter, checking in on your progress this week. How are things going?' },
+                ]
+            };
+
+            const dietitianAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&h=100&auto=format&fit=crop';
+
+            // --- DOM ELEMENT REFERENCES ---
+            const clientListEl = document.getElementById('client-list');
+            const chatHeaderEl = document.getElementById('chat-header');
+            const chatMessagesEl = document.getElementById('chat-messages');
+            const messageForm = document.getElementById('message-form');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const aiFeaturesEl = document.getElementById('ai-features');
+            const generatePlanButton = document.getElementById('generate-plan-button');
+            const loadingIndicator = document.getElementById('loading-indicator');
+
+            let activeClientId = null;
+            const apiKey = ""; // Leave blank, will be handled by the environment
+
+            // --- API CALL FUNCTIONS ---
+            
+            /**
+             * Calls the Gemini API to get a chat response.
+             * @param {string} prompt - The user's message to get a response for.
+             */
+            async function getGeminiChatResponse(prompt) {
+                setLoading(true);
+                try {
+                    const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey};
+                    const payload = {
+                        contents: [{ role: "user", parts: [{ text: As a dietitian, give a helpful and encouraging response to this client's message: "${prompt}" }] }]
+                    };
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        throw new Error(API request failed with status ${response.status});
+                    }
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        addMessageToChat('dietitian', text, true);
+                    } else {
+                        throw new Error("Invalid API response format");
+                    }
+                } catch (error) {
+                    console.error("Gemini API Error:", error);
+                    addMessageToChat('system', Error getting AI response: ${error.message});
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            /**
+             * Calls the Gemini API to generate a meal plan.
+             */
+            async function generateMealPlan() {
+                setLoading(true);
+                addMessageToChat('system', 'Generating a 3-day meal plan...');
+                try {
+                    const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey};
+                    const payload = {
+                        contents: [{ role: "user", parts: [{ text: "Generate a simple 3-day meal plan for a client looking for a balanced diet. Return it as a JSON object with a key 'meal_plan' which is an array of objects, each with 'day', 'breakfast', 'lunch', and 'dinner' keys." }] }],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    "meal_plan": {
+                                        type: "ARRAY",
+                                        items: {
+                                            type: "OBJECT",
+                                            properties: {
+                                                "day": { "type": "STRING" },
+                                                "breakfast": { "type": "STRING" },
+                                                "lunch": { "type": "STRING" },
+                                                "dinner": { "type": "STRING" },
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                     if (!response.ok) {
+                        throw new Error(API request failed with status ${response.status});
+                    }
+                    const result = await response.json();
+                     if (result.candidates && result.candidates.length > 0) {
+                        const jsonText = result.candidates[0].content.parts[0].text;
+                        const parsedJson = JSON.parse(jsonText);
+                        displayMealPlan(parsedJson.meal_plan);
+                    } else {
+                        throw new Error("Invalid API response format for meal plan");
+                    }
+                } catch (error) {
+                    console.error("Meal Plan Generation Error:", error);
+                    addMessageToChat('system', Error generating meal plan: ${error.message});
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+
+            // --- UI FUNCTIONS ---
+
+            /**
+             * Toggles the loading indicator visibility.
+             * @param {boolean} isLoading - Whether to show the loader.
+             */
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    loadingIndicator.classList.remove('hidden');
+                    sendButton.disabled = true;
+                    generatePlanButton.disabled = true;
+                } else {
+                    loadingIndicator.classList.add('hidden');
+                    sendButton.disabled = false;
+                    generatePlanButton.disabled = false;
+                }
+            }
+
+             /**
+             * Adds a message to the chat interface.
+             * @param {string} from - 'client', 'dietitian', or 'system'.
+             * @param {string} text - The message content.
+             * @param {boolean} isSuggestion - If true, styles as an AI suggestion.
+             */
+            function addMessageToChat(from, text, isSuggestion = false) {
+                const msgEl = document.createElement('div');
+                const client = clients.find(c => c.id === activeClientId);
+
+                if (from === 'dietitian') {
+                    msgEl.className = 'flex items-start gap-3 justify-end';
+                    const bgColor = isSuggestion ? 'bg-teal-600' : 'bg-indigo-500';
+                    const suggestionLabel = isSuggestion ? '<p class="text-xs text-indigo-200 mb-1 font-semibold">AI Suggestion</p>' : '';
+                    msgEl.innerHTML = `
+                        <div class="${bgColor} p-3 rounded-lg max-w-lg">
+                            ${suggestionLabel}
+                            <p>${text}</p>
+                        </div>
+                        <img class="h-8 w-8 rounded-full object-cover" src="${dietitianAvatar}" alt="Dietitian Avatar">
+                    `;
+                } else if (from === 'client') {
+                    msgEl.className = 'flex items-start gap-3';
+                    msgEl.innerHTML = `
+                        <img class="h-8 w-8 rounded-full object-cover" src="${client.avatar}" alt="${client.name}">
+                        <div class="bg-gray-700 p-3 rounded-lg max-w-lg">
+                            <p>${text}</p>
+                        </div>
+                    `;
+                } else { // System message
+                     msgEl.className = 'text-center text-sm text-gray-500 py-2';
+                     msgEl.innerHTML = <p>${text}</p>;
+                }
+                chatMessagesEl.appendChild(msgEl);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
+            }
+            
+            /**
+             * Displays the generated meal plan in the chat.
+             * @param {Array} mealPlan - The array of meal plan objects.
+             */
+            function displayMealPlan(mealPlan) {
+                let html = '<div class="bg-gray-700 p-4 rounded-lg space-y-4">';
+                html += '<h3 class="font-bold text-white text-lg">Generated 3-Day Meal Plan</h3>';
+                mealPlan.forEach(day => {
+                    html += `
+                        <div class="border-t border-gray-600 pt-2">
+                            <p class="font-semibold text-indigo-300">${day.day}</p>
+                            <ul class="list-disc list-inside text-sm text-gray-300 pl-2">
+                                <li><strong>Breakfast:</strong> ${day.breakfast}</li>
+                                <li><strong>Lunch:</strong> ${day.lunch}</li>
+                                <li><strong>Dinner:</strong> ${day.dinner}</li>
+                            </ul>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                const msgEl = document.createElement('div');
+                msgEl.className = 'flex items-start gap-3 justify-end';
+                msgEl.innerHTML = `
+                    <div class="max-w-lg w-full">${html}</div>
+                    <img class="h-8 w-8 rounded-full object-cover" src="${dietitianAvatar}" alt="Dietitian Avatar">
+                `;
+                chatMessagesEl.appendChild(msgEl);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            }
+
+
+            /**
+             * Renders the list of clients in the sidebar.
+             */
+            function renderClientList() {
+                clientListEl.innerHTML = '';
+                clients.forEach(client => {
+                    const clientEl = document.createElement('a');
+                    clientEl.href = '#';
+                    clientEl.className = 'flex items-center py-4 px-6 text-gray-300 hover:bg-gray-700 transition duration-200';
+                    clientEl.dataset.clientId = client.id;
+                    if (client.id === activeClientId) {
+                        clientEl.classList.add('client-active');
+                    }
+
+                    clientEl.innerHTML = `
+                        <img class="h-12 w-12 rounded-full object-cover" src="${client.avatar}" alt="${client.name}">
+                        <div class="ml-4 flex-grow">
+                            <p class="font-semibold text-white">${client.name}</p>
+                            <p class="text-sm ${client.status === 'Online' ? 'text-green-400' : 'text-gray-500'}">${client.status}</p>
+                        </div>
+                    `;
+                    clientListEl.appendChild(clientEl);
+                });
+            }
+
+            /**
+             * Renders the chat for a given client ID.
+             * @param {number} clientId - The ID of the client to show chat for.
+             */
+            function renderChat(clientId) {
+                activeClientId = clientId;
+                const client = clients.find(c => c.id === clientId);
+                const chat = conversations[clientId] || [];
+
+                // Update chat header
+                chatHeaderEl.querySelector('.flex.items-center').innerHTML = `
+                    <img class="h-12 w-12 rounded-full object-cover" src="${client.avatar}" alt="${client.name}">
+                    <div class="ml-4">
+                        <h2 class="text-xl font-semibold text-white">${client.name}</h2>
+                        <p class="text-sm ${client.status === 'Online' ? 'text-green-400' : 'text-gray-500'}">${client.status}</p>
+                    </div>
+                `;
+                aiFeaturesEl.classList.remove('hidden');
+
+                // Update chat messages
+                chatMessagesEl.innerHTML = '';
+                chat.forEach(msg => {
+                    addMessageToChat(msg.from, msg.text);
+                });
+                
+                // Enable input field
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+
+                // Re-render client list to show active state
+                renderClientList();
+            }
+
+            // --- EVENT LISTENERS ---
+
+            clientListEl.addEventListener('click', (event) => {
+                const target = event.target.closest('a');
+                if (!target) return;
+                
+                event.preventDefault();
+                const clientId = parseInt(target.dataset.clientId, 10);
+                renderChat(clientId);
+            });
+
+            messageForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const messageText = messageInput.value.trim();
+                if (messageText && activeClientId) {
+                    addMessageToChat('dietitian', messageText);
+                    conversations[activeClientId].push({ from: 'dietitian', text: messageText });
+                    
+                    // Call Gemini for a suggested response
+                    getGeminiChatResponse(messageText);
+
+                    messageInput.value = '';
+                }
+            });
+
+            generatePlanButton.addEventListener('click', () => {
+                if (activeClientId) {
+                    generateMealPlan();
+                }
+            });
+
+            // --- INITIALIZATION ---
+            renderClientList();
+        });
+    </script>
+</body>
+</html>
