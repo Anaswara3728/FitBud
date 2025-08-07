@@ -1,0 +1,38 @@
+.trends-page {
+  padding: 30px 50px;
+  background-color: #0f1117;
+  color: white;
+}
+
+.trends-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.search-bar {
+  background-color: #1c2330;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: white;
+  width: 300px;
+}
+
+.trend-article {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a1f2b;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.trend-article img {
+  height: 100px;
+  width: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+}
