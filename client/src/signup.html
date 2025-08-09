@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack - Sign Up</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* A very dark blue-gray */
+        }
+    </style>
+</head>
+<body class="text-gray-200 antialiased">
+
+    <!-- Sign Up Page -->
+    <div id="signup-page" class="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-4">
+        <div class="w-full max-w-md bg-gray-800 rounded-2xl shadow-lg p-8 space-y-6">
+            <div class="text-center">
+                <svg class="w-16 h-16 mx-auto text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <h1 class="text-3xl font-bold text-white mt-2">Create an Account</h1>
+                <p class="text-gray-400">Join FitTrack to start your fitness journey.</p>
+            </div>
+            <form id="signup-form" class="space-y-6">
+                 <div>
+                    <label for="full-name" class="text-sm font-medium text-gray-300">Full Name</label>
+                    <input type="text" id="full-name" name="full-name" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200" required>
+                </div>
+                <div>
+                    <label for="email" class="text-sm font-medium text-gray-300">Email Address</label>
+                    <input type="email" id="email" name="email" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200" required>
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-medium text-gray-300">Password</label>
+                    <input type="password" id="password" name="password" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200" required>
+                </div>
+                <div>
+                    <label for="user-role" class="text-sm font-medium text-gray-300">I am a...</label>
+                    <select id="user-role" name="user-role" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200">
+                        <option value="user">User</option>
+                        <option value="dietitian">Dietitian / Nutritionist</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                        Create Account
+                    </button>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-gray-400">
+                        Already have an account? <a href="#" class="font-medium text-indigo-400 hover:underline">Log In</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // This script is a placeholder for form submission logic.
+        document.getElementById('signup-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            // In a real application, you would send this data to a server.
+            alert('Sign up form submitted! (This is a demo)');
+        });
+    </script>
+</body>
+</html>

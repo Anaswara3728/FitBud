@@ -1,0 +1,132 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #0f172a;
+  color: white;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #0f172a;
+  border-bottom: 1px solid #1e293b;
+}
+
+.navbar-left {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.navbar-right {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.navbar-right a {
+  text-decoration: none;
+  color: white;
+  position: relative;
+}
+
+.navbar-right a:hover {
+  color: #3b82f6;
+}
+
+.notification-icon::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+.profile {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin: 1.5rem 0 0.5rem;
+  font-weight: bold;
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #1e293b;
+  color: white;
+  margin-top: 0.5rem;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.progress-section {
+  margin-top: 2rem;
+}
+
+.progress-label {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background-color: #3b82f6;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}

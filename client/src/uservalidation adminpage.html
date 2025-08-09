@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack - Admin Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* A very dark blue-gray */
+        }
+        /* Custom scrollbar for a better look in dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+    </style>
+</head>
+<body class="text-gray-200 antialiased">
+
+    <div class="flex h-screen bg-gray-900">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-gray-800 flex-shrink-0">
+            <div class="flex items-center justify-center h-20 border-b border-gray-700">
+                <svg class="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <h1 class="text-2xl font-bold ml-2">Admin</h1>
+            </div>
+            <nav class="mt-4">
+                <a href="#" class="flex items-center py-3 px-6 bg-gray-700 text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="ml-4">User Validation</span>
+                </a>
+                <a href="#" class="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white transition duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-1a6 6 0 00-5.197-5.975M15 21H9"></path></svg>
+                    <span class="ml-4">Manage Users</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-8">
+            <h1 class="text-3xl font-bold text-white">User Validation</h1>
+            <p class="text-gray-400 mt-1">Review and approve new account registrations.</p>
+
+            <div class="mt-8 bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-300">
+                        <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Name</th>
+                                <th scope="col" class="px-6 py-3">Email</th>
+                                <th scope="col" class="px-6 py-3">Role</th>
+                                <th scope="col" class="px-6 py-3">Status</th>
+                                <th scope="col" class="px-6 py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-validation-table">
+                            <!-- Rows will be dynamically populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 
+    ================================================================
+    JAVASCRIPT LOGIC
+    Handles the user validation actions.
+    ================================================================
+    -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MOCK DATA ---
+            // In a real application, this data would come from your server/database.
+            const pendingUsers = [
+                { id: 1, name: 'John Doe', email: 'john.d@example.com', role: 'User', status: 'Pending Approval' },
+                { id: 2, name: 'Jane Smith', email: 'jane.smith@nutrition.co', role: 'Dietitian', status: 'Pending Approval' },
+                { id: 3, name: 'Peter Jones', email: 'peter.j@example.com', role: 'User', status: 'Pending Approval' },
+                { id: 4, name: 'Dr. Emily White', email: 'emily.white@health.org', role: 'Dietitian', status: 'Pending Approval' },
+            ];
+
+            const tableBody = document.getElementById('user-validation-table');
+
+            /**
+             * Renders the user data into the table.
+             */
+            function renderTable() {
+                tableBody.innerHTML = ''; // Clear existing table rows
+
+                if (pendingUsers.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-500">
+                                No pending users to validate.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                pendingUsers.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-gray-800 border-b border-gray-700';
+                    row.dataset.userId = user.id;
+
+                    let statusClass = '';
+                    switch(user.status) {
+                        case 'Approved': statusClass = 'text-green-400'; break;
+                        case 'Denied': statusClass = 'text-red-400'; break;
+                        default: statusClass = 'text-yellow-400';
+                    }
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-white">${user.name}</td>
+                        <td class="px-6 py-4">${user.email}</td>
+                        <td class="px-6 py-4">${user.role}</td>
+                        <td class="px-6 py-4 font-semibold ${statusClass}">${user.status}</td>
+                        <td class="px-6 py-4 text-center">
+                            ${user.status === 'Pending Approval' ? `
+                            <button class="approve-btn font-medium text-green-500 hover:underline mr-4">Approve</button>
+                            <button class="deny-btn font-medium text-red-500 hover:underline">Deny</button>
+                            ` : <span>-</span>}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            /**
+             * Handles click events on the table (for approve/deny buttons).
+             */
+            tableBody.addEventListener('click', (event) => {
+                const target = event.target;
+                const row = target.closest('tr');
+                if (!row) return;
+
+                const userId = parseInt(row.dataset.userId, 10);
+                const user = pendingUsers.find(u => u.id === userId);
+
+                if (target.classList.contains('approve-btn')) {
+                    console.log(Approving user ID: ${userId});
+                    user.status = 'Approved';
+                }
+
+                if (target.classList.contains('deny-btn')) {
+                    console.log(Denying user ID: ${userId});
+                    user.status = 'Denied';
+                }
+
+                // Re-render the table to reflect the change
+                renderTable();
+            });
+
+            // --- INITIALIZATION ---
+            renderTable();
+        });
+    </script>
+</body>
+</html>

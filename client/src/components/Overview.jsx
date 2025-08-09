@@ -3,19 +3,10 @@ import "./Overview.css";
 import fullbodyWorkout from "./assets/fullbodyWorkout.jpg"
 import run from "./assets/run.jpg"
 import { useNavigate } from "react-router-dom";
-<<<<<<< HEAD
 const navigate = useNavigate();
 
 const Overview = () => {
   
-=======
-import { MdNotificationsNone } from "react-icons/md";
-import Header from "./components/Header";
-
-const Overview = () => {
-  
-  const navigate = useNavigate();
->>>>>>> 947ea482a17592179ef7ad2654a9ae625b81fc6f
   const [stats, setStats] = useState([]);
   const [workouts, setWorkouts] = useState([]);
   const [goal, setGoal] = useState(0);
@@ -50,7 +41,6 @@ const Overview = () => {
 
   return (
     <div className="dashboard">
-<<<<<<< HEAD
       <header className="dashboard-header">
         <span className="logo">🏋️ FitTrack</span>
         <div className="dashboard-nav">
@@ -70,9 +60,6 @@ const Overview = () => {
         </div>
       </header>
 
-=======
-      <Header/>
->>>>>>> 947ea482a17592179ef7ad2654a9ae625b81fc6f
       <main className="dashboard-body">
         <h2>Overview</h2>
         <p className="welcome">Welcome back, Chloe</p>
