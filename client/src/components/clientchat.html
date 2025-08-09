@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack - My Chat</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* A very dark blue-gray */
+        }
+        /* Custom scrollbar for a better look in dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; /* gray-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563; /* gray-600 */
+        }
+    </style>
+</head>
+<body class="text-gray-200 antialiased">
+
+    <div class="flex h-screen bg-gray-900">
+        <!-- Main Chat Area -->
+        <main class="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+            <!-- Chat Header -->
+            <header id="chat-header" class="flex items-center h-20 px-8 bg-gray-800 border-b border-gray-700 flex-shrink-0">
+                 <div class="flex items-center">
+                    <img id="dietitian-avatar-header" class="h-12 w-12 rounded-full object-cover" src="" alt="Dietitian Avatar">
+                    <div class="ml-4">
+                        <h2 id="dietitian-name-header" class="text-xl font-semibold text-white"></h2>
+                        <p id="dietitian-status-header" class="text-sm"></p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-grow p-8 overflow-y-auto space-y-6">
+                <!-- Messages will be dynamically populated by JavaScript -->
+            </div>
+
+            <!-- Message Input -->
+            <footer class="p-4 bg-gray-800 border-t border-gray-700 flex-shrink-0">
+                <form id="message-form" class="flex items-center">
+                    <input type="text" id="message-input" placeholder="Type a message..." class="flex-grow bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <button id="send-button" type="submit" class="ml-4 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-lg transition duration-300">
+                        Send
+                    </button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <!-- 
+    ================================================================
+    JAVASCRIPT LOGIC
+    Handles the client-side chat interface.
+    ================================================================
+    -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MOCK DATA ---
+            const client = { 
+                id: 1, 
+                name: 'Sophia Carter', 
+                avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&h=100&auto=format&fit=crop' 
+            };
+
+            const dietitian = {
+                name: 'Dr. Chloe',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&h=100&auto=format&fit=crop',
+                status: 'Online'
+            };
+
+            const conversation = [
+                { from: 'client', text: 'Hi Dr. Chloe, I want to improve my current diet and set some specific goals. Can you help?' },
+                { from: 'dietitian', text: "Hi Sophia! I'd be happy to help. Let's start with your diet, as this will provide a solid foundation." },
+                { from: 'client', text: "Great! What's the first step?" },
+            ];
+
+            // --- DOM ELEMENT REFERENCES ---
+            const chatHeaderEl = document.getElementById('chat-header');
+            const dietitianAvatarHeader = document.getElementById('dietitian-avatar-header');
+            const dietitianNameHeader = document.getElementById('dietitian-name-header');
+            const dietitianStatusHeader = document.getElementById('dietitian-status-header');
+            const chatMessagesEl = document.getElementById('chat-messages');
+            const messageForm = document.getElementById('message-form');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+
+            /**
+             * Adds a message to the chat interface.
+             * @param {string} from - 'client' or 'dietitian'.
+             * @param {string} text - The message content.
+             */
+            function addMessageToChat(from, text) {
+                const msgEl = document.createElement('div');
+                
+                if (from === 'client') {
+                    msgEl.className = 'flex items-start gap-3 justify-end';
+                    msgEl.innerHTML = `
+                        <div class="bg-indigo-500 p-3 rounded-lg max-w-lg">
+                            <p>${text}</p>
+                        </div>
+                        <img class="h-8 w-8 rounded-full object-cover" src="${client.avatar}" alt="${client.name}">
+                    `;
+                } else { // Message from dietitian
+                    msgEl.className = 'flex items-start gap-3';
+                    msgEl.innerHTML = `
+                        <img class="h-8 w-8 rounded-full object-cover" src="${dietitian.avatar}" alt="${dietitian.name}">
+                        <div class="bg-gray-700 p-3 rounded-lg max-w-lg">
+                            <p>${text}</p>
+                        </div>
+                    `;
+                }
+                chatMessagesEl.appendChild(msgEl);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
+            }
+
+            /**
+             * Renders the initial chat state.
+             */
+            function initializeChat() {
+                // Set header info
+                dietitianAvatarHeader.src = dietitian.avatar;
+                dietitianNameHeader.textContent = dietitian.name;
+                dietitianStatusHeader.textContent = dietitian.status;
+                dietitianStatusHeader.className = `text-sm ${dietitian.status === 'Online' ? 'text-green-400' : 'text-gray-500'}`;
+
+                // Populate messages
+                chatMessagesEl.innerHTML = '';
+                conversation.forEach(msg => {
+                    addMessageToChat(msg.from, msg.text);
+                });
+            }
+
+            // --- EVENT LISTENERS ---
+            messageForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const messageText = messageInput.value.trim();
+                if (messageText) {
+                    addMessageToChat('client', messageText);
+                    // In a real app, you'd send this message to the server.
+                    conversation.push({ from: 'client', text: messageText });
+                    messageInput.value = '';
+                }
+            });
+
+            // --- INITIALIZATION ---
+            initializeChat();
+        });
+    </script>
+</body>
+</html>

@@ -164,9 +164,9 @@
             async function getGeminiChatResponse(prompt) {
                 setLoading(true);
                 try {
-                    const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey};
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                     const payload = {
-                        contents: [{ role: "user", parts: [{ text: As a dietitian, give a helpful and encouraging response to this client's message: "${prompt}" }] }]
+                        contents: [{ role: "user", parts: [{ text: `As a dietitian, give a helpful and encouraging response to this client's message: "${prompt}"` }] }]
                     };
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -174,7 +174,7 @@
                         body: JSON.stringify(payload)
                     });
                     if (!response.ok) {
-                        throw new Error(API request failed with status ${response.status});
+                        throw new Error(`API request failed with status ${response.status}`);
                     }
                     const result = await response.json();
                     if (result.candidates && result.candidates.length > 0) {
@@ -185,7 +185,7 @@
                     }
                 } catch (error) {
                     console.error("Gemini API Error:", error);
-                    addMessageToChat('system', Error getting AI response: ${error.message});
+                    addMessageToChat('system', `Error getting AI response: ${error.message}`);
                 } finally {
                     setLoading(false);
                 }
@@ -198,7 +198,7 @@
                 setLoading(true);
                 addMessageToChat('system', 'Generating a 3-day meal plan...');
                 try {
-                    const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey};
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                     const payload = {
                         contents: [{ role: "user", parts: [{ text: "Generate a simple 3-day meal plan for a client looking for a balanced diet. Return it as a JSON object with a key 'meal_plan' which is an array of objects, each with 'day', 'breakfast', 'lunch', and 'dinner' keys." }] }],
                         generationConfig: {
@@ -228,7 +228,7 @@
                         body: JSON.stringify(payload)
                     });
                      if (!response.ok) {
-                        throw new Error(API request failed with status ${response.status});
+                        throw new Error(`API request failed with status ${response.status}`);
                     }
                     const result = await response.json();
                      if (result.candidates && result.candidates.length > 0) {
@@ -240,7 +240,7 @@
                     }
                 } catch (error) {
                     console.error("Meal Plan Generation Error:", error);
-                    addMessageToChat('system', Error generating meal plan: ${error.message});
+                    addMessageToChat('system', `Error generating meal plan: ${error.message}`);
                 } finally {
                     setLoading(false);
                 }
@@ -296,7 +296,7 @@
                     `;
                 } else { // System message
                      msgEl.className = 'text-center text-sm text-gray-500 py-2';
-                     msgEl.innerHTML = <p>${text}</p>;
+                     msgEl.innerHTML = `<p>${text}</p>`;
                 }
                 chatMessagesEl.appendChild(msgEl);
                 chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
