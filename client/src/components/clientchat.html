@@ -34,6 +34,18 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #4b5563; /* gray-600 */
         }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #6366f1; /* indigo-500 */
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="text-gray-200 antialiased">
@@ -42,13 +54,19 @@
         <!-- Main Chat Area -->
         <main class="flex-1 flex flex-col max-w-4xl mx-auto w-full">
             <!-- Chat Header -->
-            <header id="chat-header" class="flex items-center h-20 px-8 bg-gray-800 border-b border-gray-700 flex-shrink-0">
+            <header id="chat-header" class="flex items-center justify-between h-20 px-8 bg-gray-800 border-b border-gray-700 flex-shrink-0">
                  <div class="flex items-center">
                     <img id="dietitian-avatar-header" class="h-12 w-12 rounded-full object-cover" src="" alt="Dietitian Avatar">
                     <div class="ml-4">
                         <h2 id="dietitian-name-header" class="text-xl font-semibold text-white"></h2>
                         <p id="dietitian-status-header" class="text-sm"></p>
                     </div>
+                </div>
+                <div>
+                    <button id="generate-plan-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        Generate Meal Plan
+                    </button>
                 </div>
             </header>
 
@@ -59,6 +77,10 @@
 
             <!-- Message Input -->
             <footer class="p-4 bg-gray-800 border-t border-gray-700 flex-shrink-0">
+                <div id="loading-indicator" class="hidden text-center mb-2">
+                    <div class="loader inline-block"></div>
+                    <p class="text-sm text-gray-400 ml-2 inline-block">AI is thinking...</p>
+                </div>
                 <form id="message-form" class="flex items-center">
                     <input type="text" id="message-input" placeholder="Type a message..." class="flex-grow bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
                     <button id="send-button" type="submit" class="ml-4 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-lg transition duration-300">
@@ -69,12 +91,6 @@
         </main>
     </div>
 
-    <!-- 
-    ================================================================
-    JAVASCRIPT LOGIC
-    Handles the client-side chat interface.
-    ================================================================
-    -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- MOCK DATA ---
@@ -95,22 +111,86 @@
                 { from: 'dietitian', text: "Hi Sophia! I'd be happy to help. Let's start with your diet, as this will provide a solid foundation." },
                 { from: 'client', text: "Great! What's the first step?" },
             ];
+            
+            const apiKey = "AIzaSyD1m37fQ4N1gTs7blleAzobClE-GsTo8V4"; // Leave blank, will be handled by the environment
 
             // --- DOM ELEMENT REFERENCES ---
-            const chatHeaderEl = document.getElementById('chat-header');
             const dietitianAvatarHeader = document.getElementById('dietitian-avatar-header');
             const dietitianNameHeader = document.getElementById('dietitian-name-header');
             const dietitianStatusHeader = document.getElementById('dietitian-status-header');
             const chatMessagesEl = document.getElementById('chat-messages');
             const messageForm = document.getElementById('message-form');
             const messageInput = document.getElementById('message-input');
+            const generatePlanButton = document.getElementById('generate-plan-button');
+            const loadingIndicator = document.getElementById('loading-indicator');
             const sendButton = document.getElementById('send-button');
 
-            /**
-             * Adds a message to the chat interface.
-             * @param {string} from - 'client' or 'dietitian'.
-             * @param {string} text - The message content.
-             */
+            // --- API CALL FUNCTION ---
+            async function generateMealPlan() {
+                setLoading(true);
+                addMessageToChat('system', 'Generating a 3-day meal plan...');
+                try {
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                    const payload = {
+                        contents: [{ role: "user", parts: [{ text: "Generate a simple 3-day meal plan for a client looking for a balanced diet. Return it as a JSON object with a key 'meal_plan' which is an array of objects, each with 'day', 'breakfast', 'lunch', and 'dinner' keys." }] }],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    "meal_plan": {
+                                        type: "ARRAY",
+                                        items: {
+                                            type: "OBJECT",
+                                            properties: {
+                                                "day": { "type": "STRING" },
+                                                "breakfast": { "type": "STRING" },
+                                                "lunch": { "type": "STRING" },
+                                                "dinner": { "type": "STRING" },
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                     if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+                    const result = await response.json();
+                     if (result.candidates && result.candidates.length > 0) {
+                        const jsonText = result.candidates[0].content.parts[0].text;
+                        const parsedJson = JSON.parse(jsonText);
+                        displayMealPlan(parsedJson.meal_plan);
+                    } else {
+                        throw new Error("Invalid API response format for meal plan");
+                    }
+                } catch (error) {
+                    console.error("Meal Plan Generation Error:", error);
+                    addMessageToChat('system', `Error generating meal plan: ${error.message}`);
+                } finally {
+                    setLoading(false);
+                }
+            }
+            
+            // --- UI FUNCTIONS ---
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    loadingIndicator.classList.remove('hidden');
+                    sendButton.disabled = true;
+                    generatePlanButton.disabled = true;
+                } else {
+                    loadingIndicator.classList.add('hidden');
+                    sendButton.disabled = false;
+                    generatePlanButton.disabled = false;
+                }
+            }
+
             function addMessageToChat(from, text) {
                 const msgEl = document.createElement('div');
                 
@@ -122,7 +202,7 @@
                         </div>
                         <img class="h-8 w-8 rounded-full object-cover" src="${client.avatar}" alt="${client.name}">
                     `;
-                } else { // Message from dietitian
+                } else if (from === 'dietitian') {
                     msgEl.className = 'flex items-start gap-3';
                     msgEl.innerHTML = `
                         <img class="h-8 w-8 rounded-full object-cover" src="${dietitian.avatar}" alt="${dietitian.name}">
@@ -130,22 +210,47 @@
                             <p>${text}</p>
                         </div>
                     `;
+                } else { // System message
+                     msgEl.className = 'text-center text-sm text-gray-500 py-2';
+                     msgEl.innerHTML = `<p>${text}</p>`;
                 }
                 chatMessagesEl.appendChild(msgEl);
-                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            }
+            
+            function displayMealPlan(mealPlan) {
+                let html = '<div class="bg-indigo-600 p-4 rounded-lg space-y-4">';
+                html += '<h3 class="font-bold text-white text-lg">My Generated 3-Day Meal Plan</h3>';
+                mealPlan.forEach(day => {
+                    html += `
+                        <div class="border-t border-indigo-400 pt-2">
+                            <p class="font-semibold text-indigo-200">${day.day}</p>
+                            <ul class="list-disc list-inside text-sm text-indigo-100 pl-2">
+                                <li><strong>Breakfast:</strong> ${day.breakfast}</li>
+                                <li><strong>Lunch:</strong> ${day.lunch}</li>
+                                <li><strong>Dinner:</strong> ${day.dinner}</li>
+                            </ul>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                const msgEl = document.createElement('div');
+                msgEl.className = 'flex items-start gap-3 justify-end';
+                msgEl.innerHTML = `
+                    <div class="max-w-lg w-full">${html}</div>
+                    <img class="h-8 w-8 rounded-full object-cover" src="${client.avatar}" alt="${client.name}">
+                `;
+                chatMessagesEl.appendChild(msgEl);
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
             }
 
-            /**
-             * Renders the initial chat state.
-             */
             function initializeChat() {
-                // Set header info
                 dietitianAvatarHeader.src = dietitian.avatar;
                 dietitianNameHeader.textContent = dietitian.name;
                 dietitianStatusHeader.textContent = dietitian.status;
                 dietitianStatusHeader.className = `text-sm ${dietitian.status === 'Online' ? 'text-green-400' : 'text-gray-500'}`;
 
-                // Populate messages
                 chatMessagesEl.innerHTML = '';
                 conversation.forEach(msg => {
                     addMessageToChat(msg.from, msg.text);
@@ -158,11 +263,12 @@
                 const messageText = messageInput.value.trim();
                 if (messageText) {
                     addMessageToChat('client', messageText);
-                    // In a real app, you'd send this message to the server.
                     conversation.push({ from: 'client', text: messageText });
                     messageInput.value = '';
                 }
             });
+            
+            generatePlanButton.addEventListener('click', generateMealPlan);
 
             // --- INITIALIZATION ---
             initializeChat();

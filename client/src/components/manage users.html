@@ -159,13 +159,13 @@
 
                 if (target.classList.contains('edit-btn')) {
                     // In a real app, this would open a modal or a new page to edit user details.
-                    alert(Editing user ID: ${userId} (This is a demo));
+                    alert(`Editing user ID: ${userId} (This is a demo)`);
                 }
 
                 if (target.classList.contains('delete-btn')) {
                     // Confirm before deleting
-                    if (confirm(Are you sure you want to delete user ID: ${userId}?)) {
-                        console.log(Deleting user ID: ${userId});
+                    if (confirm(`Are you sure you want to delete user ID: ${userId}?`)) {
+                        console.log(`Deleting user ID: ${userId}`);
                         // Remove the user from the array
                         allUsers = allUsers.filter(u => u.id !== userId);
                         // Re-render the table to reflect the change

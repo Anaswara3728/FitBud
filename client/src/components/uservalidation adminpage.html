@@ -140,7 +140,7 @@
                             ${user.status === 'Pending Approval' ? `
                             <button class="approve-btn font-medium text-green-500 hover:underline mr-4">Approve</button>
                             <button class="deny-btn font-medium text-red-500 hover:underline">Deny</button>
-                            ` : <span>-</span>}
+                            ` : `<span>-</span>`}
                         </td>
                     `;
                     tableBody.appendChild(row);
@@ -159,12 +159,12 @@
                 const user = pendingUsers.find(u => u.id === userId);
 
                 if (target.classList.contains('approve-btn')) {
-                    console.log(Approving user ID: ${userId});
+                    console.log(`Approving user ID: ${userId}`);
                     user.status = 'Approved';
                 }
 
                 if (target.classList.contains('deny-btn')) {
-                    console.log(Denying user ID: ${userId});
+                    console.log(`Denying user ID: ${userId}`);
                     user.status = 'Denied';
                 }
 

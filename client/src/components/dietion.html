@@ -78,12 +78,6 @@
                         <p class="text-sm text-gray-400">No client selected</p>
                     </div>
                 </div>
-                <div id="ai-features" class="hidden">
-                    <button id="generate-plan-button" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                        Generate Meal Plan
-                    </button>
-                </div>
             </header>
 
             <!-- Chat Messages -->
@@ -110,12 +104,6 @@
         </main>
     </div>
 
-    <!-- 
-    ================================================================
-    JAVASCRIPT LOGIC
-    Handles client selection, chat interface, and Gemini API calls.
-    ================================================================
-    -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- MOCK DATA ---
@@ -148,19 +136,12 @@
             const messageForm = document.getElementById('message-form');
             const messageInput = document.getElementById('message-input');
             const sendButton = document.getElementById('send-button');
-            const aiFeaturesEl = document.getElementById('ai-features');
-            const generatePlanButton = document.getElementById('generate-plan-button');
             const loadingIndicator = document.getElementById('loading-indicator');
 
             let activeClientId = null;
             const apiKey = ""; // Leave blank, will be handled by the environment
 
-            // --- API CALL FUNCTIONS ---
-            
-            /**
-             * Calls the Gemini API to get a chat response.
-             * @param {string} prompt - The user's message to get a response for.
-             */
+            // --- API CALL FUNCTION ---
             async function getGeminiChatResponse(prompt) {
                 setLoading(true);
                 try {
@@ -191,86 +172,17 @@
                 }
             }
 
-            /**
-             * Calls the Gemini API to generate a meal plan.
-             */
-            async function generateMealPlan() {
-                setLoading(true);
-                addMessageToChat('system', 'Generating a 3-day meal plan...');
-                try {
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                    const payload = {
-                        contents: [{ role: "user", parts: [{ text: "Generate a simple 3-day meal plan for a client looking for a balanced diet. Return it as a JSON object with a key 'meal_plan' which is an array of objects, each with 'day', 'breakfast', 'lunch', and 'dinner' keys." }] }],
-                        generationConfig: {
-                            responseMimeType: "application/json",
-                            responseSchema: {
-                                type: "OBJECT",
-                                properties: {
-                                    "meal_plan": {
-                                        type: "ARRAY",
-                                        items: {
-                                            type: "OBJECT",
-                                            properties: {
-                                                "day": { "type": "STRING" },
-                                                "breakfast": { "type": "STRING" },
-                                                "lunch": { "type": "STRING" },
-                                                "dinner": { "type": "STRING" },
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    };
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                     if (!response.ok) {
-                        throw new Error(`API request failed with status ${response.status}`);
-                    }
-                    const result = await response.json();
-                     if (result.candidates && result.candidates.length > 0) {
-                        const jsonText = result.candidates[0].content.parts[0].text;
-                        const parsedJson = JSON.parse(jsonText);
-                        displayMealPlan(parsedJson.meal_plan);
-                    } else {
-                        throw new Error("Invalid API response format for meal plan");
-                    }
-                } catch (error) {
-                    console.error("Meal Plan Generation Error:", error);
-                    addMessageToChat('system', `Error generating meal plan: ${error.message}`);
-                } finally {
-                    setLoading(false);
-                }
-            }
-
-
             // --- UI FUNCTIONS ---
-
-            /**
-             * Toggles the loading indicator visibility.
-             * @param {boolean} isLoading - Whether to show the loader.
-             */
             function setLoading(isLoading) {
                 if (isLoading) {
                     loadingIndicator.classList.remove('hidden');
                     sendButton.disabled = true;
-                    generatePlanButton.disabled = true;
                 } else {
                     loadingIndicator.classList.add('hidden');
                     sendButton.disabled = false;
-                    generatePlanButton.disabled = false;
                 }
             }
 
-             /**
-             * Adds a message to the chat interface.
-             * @param {string} from - 'client', 'dietitian', or 'system'.
-             * @param {string} text - The message content.
-             * @param {boolean} isSuggestion - If true, styles as an AI suggestion.
-             */
             function addMessageToChat(from, text, isSuggestion = false) {
                 const msgEl = document.createElement('div');
                 const client = clients.find(c => c.id === activeClientId);
@@ -299,44 +211,9 @@
                      msgEl.innerHTML = `<p>${text}</p>`;
                 }
                 chatMessagesEl.appendChild(msgEl);
-                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
-            }
-            
-            /**
-             * Displays the generated meal plan in the chat.
-             * @param {Array} mealPlan - The array of meal plan objects.
-             */
-            function displayMealPlan(mealPlan) {
-                let html = '<div class="bg-gray-700 p-4 rounded-lg space-y-4">';
-                html += '<h3 class="font-bold text-white text-lg">Generated 3-Day Meal Plan</h3>';
-                mealPlan.forEach(day => {
-                    html += `
-                        <div class="border-t border-gray-600 pt-2">
-                            <p class="font-semibold text-indigo-300">${day.day}</p>
-                            <ul class="list-disc list-inside text-sm text-gray-300 pl-2">
-                                <li><strong>Breakfast:</strong> ${day.breakfast}</li>
-                                <li><strong>Lunch:</strong> ${day.lunch}</li>
-                                <li><strong>Dinner:</strong> ${day.dinner}</li>
-                            </ul>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                
-                const msgEl = document.createElement('div');
-                msgEl.className = 'flex items-start gap-3 justify-end';
-                msgEl.innerHTML = `
-                    <div class="max-w-lg w-full">${html}</div>
-                    <img class="h-8 w-8 rounded-full object-cover" src="${dietitianAvatar}" alt="Dietitian Avatar">
-                `;
-                chatMessagesEl.appendChild(msgEl);
                 chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
             }
 
-
-            /**
-             * Renders the list of clients in the sidebar.
-             */
             function renderClientList() {
                 clientListEl.innerHTML = '';
                 clients.forEach(client => {
@@ -359,16 +236,11 @@
                 });
             }
 
-            /**
-             * Renders the chat for a given client ID.
-             * @param {number} clientId - The ID of the client to show chat for.
-             */
             function renderChat(clientId) {
                 activeClientId = clientId;
                 const client = clients.find(c => c.id === clientId);
                 const chat = conversations[clientId] || [];
 
-                // Update chat header
                 chatHeaderEl.querySelector('.flex.items-center').innerHTML = `
                     <img class="h-12 w-12 rounded-full object-cover" src="${client.avatar}" alt="${client.name}">
                     <div class="ml-4">
@@ -376,24 +248,19 @@
                         <p class="text-sm ${client.status === 'Online' ? 'text-green-400' : 'text-gray-500'}">${client.status}</p>
                     </div>
                 `;
-                aiFeaturesEl.classList.remove('hidden');
 
-                // Update chat messages
                 chatMessagesEl.innerHTML = '';
                 chat.forEach(msg => {
                     addMessageToChat(msg.from, msg.text);
                 });
                 
-                // Enable input field
                 messageInput.disabled = false;
                 sendButton.disabled = false;
 
-                // Re-render client list to show active state
                 renderClientList();
             }
 
             // --- EVENT LISTENERS ---
-
             clientListEl.addEventListener('click', (event) => {
                 const target = event.target.closest('a');
                 if (!target) return;
@@ -410,16 +277,9 @@
                     addMessageToChat('dietitian', messageText);
                     conversations[activeClientId].push({ from: 'dietitian', text: messageText });
                     
-                    // Call Gemini for a suggested response
                     getGeminiChatResponse(messageText);
 
                     messageInput.value = '';
-                }
-            });
-
-            generatePlanButton.addEventListener('click', () => {
-                if (activeClientId) {
-                    generateMealPlan();
                 }
             });
 
