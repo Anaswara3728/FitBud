@@ -6,7 +6,8 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import ClientChat from "./components/ClientChat";
 import DietitianDashboard from "./components/DietitianDashboard";
-import AdminDashboard from "./components/AdminDashboard";
+import ManageUsers from "./components/ManageUsers";
+import InteractiveWorkoutPlanner from "./components/InteractiveWorkoutPlanner";
 
 function App() {
     return (
@@ -21,7 +22,11 @@ function App() {
                     path="/dietitiondashboard"
                     element={<DietitianDashboard />}
                 />
-                <Route path="/admindashboard" element={<AdminDashboard />} />
+                <Route path="/manageusers" element={<ManageUsers />} />
+                <Route
+                    path="/interactiveworkoutplanner"
+                    element={<InteractiveWorkoutPlanner />}
+                />
             </Routes>
         </Router>
     );
