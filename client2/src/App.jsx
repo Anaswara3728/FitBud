@@ -6,7 +6,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import ClientChat from "./components/ClientChat";
 import DietitianDashboard from "./components/DietitianDashboard";
-import AdminDashboard from "./components/AdminDashboard";
+
 
 function App() {
     return (
@@ -21,7 +21,8 @@ function App() {
                     path="/dietitiondashboard"
                     element={<DietitianDashboard />}
                 />
-                <Route path="/admindashboard" element={<AdminDashboard />} />
+                
+                
             </Routes>
         </Router>
     );

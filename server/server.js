@@ -1,31 +1,38 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const connectDB = require('./db/connect'); 
-const authRoutes = require('./routes/auth'); 
-const passwordRoutes = require('./routes/password'); 
+
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import connectDB from "./db/connect.js";
+import authRoutes from "./routes/auth.js";
+import passwordRoutes from "./routes/password.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Enable CORS for React frontend
+app.use(
+  cors({
+    origin: "http://localhost:5173", // React frontend URL
+    credentials: true,               // if you send cookies (optional)
+  })
+);
 
+// Middleware
 app.use(express.json());
 
-
+// Connect to MongoDB
 connectDB();
 
-
-app.get('/', (req, res) => {
-  res.send('🚀 Server connected with Mongoose!');
+// Routes
+app.get("/", (req, res) => {
+  res.send("Server connected with Mongoose!");
 });
 
-
-app.use(express.json());
-app.use('/api/auth', authRoutes);          
-app.use('/api/password', passwordRoutes);  
-
+app.use("/api/auth", authRoutes);
+app.use("/api/password", passwordRoutes);
 
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
