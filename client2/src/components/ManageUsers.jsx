@@ -33,9 +33,54 @@ const initialPendingUsers = [
     },
 ];
 
+const initialAllUsers = [
+    {
+        id: 1,
+        name: "John Doe",
+        email: "john.d@example.com",
+        role: "User",
+        status: "Approved",
+    },
+    {
+        id: 2,
+        name: "Jane Smith",
+        email: "jane.smith@nutrition.co",
+        role: "Dietitian",
+        status: "Approved",
+    },
+    {
+        id: 3,
+        name: "Peter Jones",
+        email: "peter.j@example.com",
+        role: "User",
+        status: "Pending Approval",
+    },
+    {
+        id: 4,
+        name: "Dr. Emily White",
+        email: "emily.white@health.org",
+        role: "Dietitian",
+        status: "Approved",
+    },
+    {
+        id: 5,
+        name: "Chris Green",
+        email: "chris.g@example.com",
+        role: "User",
+        status: "Denied",
+    },
+    {
+        id: 6,
+        name: "Admin User",
+        email: "admin@fittrack.com",
+        role: "Admin",
+        status: "Approved",
+    },
+];
+
 // --- Sub-components ---
 
-const Sidebar = () => (
+const Sidebar = ({ activeView, setActiveView }) => (
     <aside className="w-64 bg-gray-800 flex-shrink-0 hidden md:flex md:flex-col">
         <div className="flex items-center justify-center h-20 border-b border-gray-700">
             <svg
@@ -54,9 +99,9 @@ const Sidebar = () => (
             <h1 className="text-2xl font-bold ml-2 text-white">Admin</h1>
         </div>
         <nav className="mt-4">
-            <a
-                href="#"
-                className="flex items-center py-3 px-6 bg-gray-700 text-white"
+            <button
+                onClick={() => setActiveView("validation")}
+                className={`flex items-center w-full text-left py-3 px-6 transition duration-200 ${activeView === "validation" ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
             >
                 <svg
                     className="w-6 h-6"
@@ -72,10 +117,10 @@ const Sidebar = () => (
                     ></path>
                 </svg>
                 <span className="ml-4">User Validation</span>
-            </a>
-            <a
-                href="#"
-                className="flex items-center py-3 px-6 text-gray-300 hover:bg-gray-700 hover:text-white transition duration-200"
+            </button>
+            <button
+                onClick={() => setActiveView("manage")}
+                className={`flex items-center w-full text-left py-3 px-6 transition duration-200 ${activeView === "manage" ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white"}`}
             >
                 <svg
                     className="w-6 h-6"
@@ -91,12 +136,12 @@ const Sidebar = () => (
                     ></path>
                 </svg>
                 <span className="ml-4">Manage Users</span>
-            </a>
+            </button>
         </nav>
     </aside>
 );
 
-const UserValidationTable = ({ users, onApprove, onDeny }) => {
+const UserTable = ({ users, onAction, actionType }) => {
     const getStatusClass = (status) => {
         switch (status) {
             case "Approved":
@@ -131,7 +176,6 @@ const UserValidationTable = ({ users, onApprove, onDeny }) => {
                             </th>
                         </tr>
                     </thead>
-                    {/* The <tbody> tag is necessary here to wrap the animated rows */}
                     <tbody>
                         <AnimatePresence>
                             {users.length > 0 ? (
@@ -141,8 +185,11 @@ const UserValidationTable = ({ users, onApprove, onDeny }) => {
                                         layout
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0, x: -50 }}
-                                        transition={{ duration: 0.3 }}
+                                        exit={{
+                                            opacity: 0,
+                                            x: -50,
+                                            transition: { duration: 0.3 },
+                                        }}
                                         className="bg-gray-800 border-b border-gray-700"
                                     >
                                         <td className="px-6 py-4 font-medium text-white">
@@ -160,12 +207,16 @@ const UserValidationTable = ({ users, onApprove, onDeny }) => {
                                             {user.status}
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            {user.status ===
-                                            "Pending Approval" ? (
+                                            {actionType === "validation" &&
+                                            user.status ===
+                                                "Pending Approval" ? (
                                                 <>
                                                     <button
                                                         onClick={() =>
-                                                            onApprove(user.id)
+                                                            onAction(
+                                                                "approve",
+                                                                user.id,
+                                                            )
                                                         }
                                                         className="font-medium text-green-500 hover:underline mr-4"
                                                     >
@@ -173,11 +224,39 @@ const UserValidationTable = ({ users, onApprove, onDeny }) => {
                                                     </button>
                                                     <button
                                                         onClick={() =>
-                                                            onDeny(user.id)
+                                                            onAction(
+                                                                "deny",
+                                                                user.id,
+                                                            )
                                                         }
                                                         className="font-medium text-red-500 hover:underline"
                                                     >
                                                         Deny
+                                                    </button>
+                                                </>
+                                            ) : actionType === "manage" ? (
+                                                <>
+                                                    <button
+                                                        onClick={() =>
+                                                            onAction(
+                                                                "edit",
+                                                                user.id,
+                                                            )
+                                                        }
+                                                        className="font-medium text-blue-500 hover:underline mr-4"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            onAction(
+                                                                "delete",
+                                                                user.id,
+                                                            )
+                                                        }
+                                                        className="font-medium text-red-500 hover:underline"
+                                                    >
+                                                        Delete
                                                     </button>
                                                 </>
                                             ) : (
@@ -195,7 +274,7 @@ const UserValidationTable = ({ users, onApprove, onDeny }) => {
                                         colSpan="5"
                                         className="text-center py-8 text-gray-500"
                                     >
-                                        No pending users to validate.
+                                        No users found.
                                     </td>
                                 </motion.tr>
                             )}
@@ -209,23 +288,28 @@ const UserValidationTable = ({ users, onApprove, onDeny }) => {
 
 // --- Main Admin Dashboard Component ---
 
-export default function AdminDashboard() {
-    const [users, setUsers] = useState(initialPendingUsers);
+export default function ManageUsers() {
+    const [pendingUsers, setPendingUsers] = useState(initialPendingUsers);
+    const [allUsers, setAllUsers] = useState(initialAllUsers);
+    const [activeView, setActiveView] = useState("validation"); // 'validation' or 'manage'
 
-    const handleApprove = (userId) => {
-        setUsers(
-            users.map((user) =>
-                user.id === userId ? { ...user, status: "Approved" } : user,
+    const handleValidationAction = (action, userId) => {
+        const status = action === "approve" ? "Approved" : "Denied";
+        setPendingUsers(
+            pendingUsers.map((user) =>
+                user.id === userId ? { ...user, status } : user,
             ),
         );
     };
 
-    const handleDeny = (userId) => {
-        setUsers(
-            users.map((user) =>
-                user.id === userId ? { ...user, status: "Denied" } : user,
-            ),
-        );
+    const handleManageAction = (action, userId) => {
+        if (action === "edit") {
+            alert(`Editing user ID: ${userId} (This is a demo)`);
+        }
+        if (action === "delete") {
+            // No confirm for this demo as per instructions
+            setAllUsers(allUsers.filter((u) => u.id !== userId));
+        }
     };
 
     return (
@@ -237,19 +321,52 @@ export default function AdminDashboard() {
                 ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
             `}</style>
             <div className="flex h-screen bg-gray-900 text-gray-200 font-sans">
-                <Sidebar />
+                <Sidebar
+                    activeView={activeView}
+                    setActiveView={setActiveView}
+                />
                 <main className="flex-1 overflow-y-auto p-8">
-                    <h1 className="text-3xl font-bold text-white">
-                        User Validation
-                    </h1>
-                    <p className="text-gray-400 mt-1">
-                        Review and approve new account registrations.
-                    </p>
-                    <UserValidationTable
-                        users={users}
-                        onApprove={handleApprove}
-                        onDeny={handleDeny}
-                    />
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeView}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {activeView === "validation" ? (
+                                <>
+                                    <h1 className="text-3xl font-bold text-white">
+                                        User Validation
+                                    </h1>
+                                    <p className="text-gray-400 mt-1">
+                                        Review and approve new account
+                                        registrations.
+                                    </p>
+                                    <UserTable
+                                        users={pendingUsers}
+                                        onAction={handleValidationAction}
+                                        actionType="validation"
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <h1 className="text-3xl font-bold text-white">
+                                        Manage Users
+                                    </h1>
+                                    <p className="text-gray-400 mt-1">
+                                        View, edit, or delete existing user
+                                        accounts.
+                                    </p>
+                                    <UserTable
+                                        users={allUsers}
+                                        onAction={handleManageAction}
+                                        actionType="manage"
+                                    />
+                                </>
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 </main>
             </div>
         </>
