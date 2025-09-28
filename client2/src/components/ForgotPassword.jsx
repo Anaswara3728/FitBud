@@ -35,10 +35,23 @@ const itemVariants = {
 
 // Forgot Password Component
 export default function ForgotPassword() {
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        alert("Password reset link sent! (This is a demo)");
-    };
+    const handleSubmit = async (e) => {
+  e.preventDefault();
+  const email = e.target[0].value;
+
+  try {
+    const res = await fetch("http://localhost:4000/api/password/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    alert(data.message);
+  } catch (err) {
+    alert("Something went wrong!");
+  }
+};
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 text-gray-200 overflow-hidden relative p-4">
