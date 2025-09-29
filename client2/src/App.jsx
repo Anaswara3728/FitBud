@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import ForgotPassword from "./components/ForgotPassword";
@@ -13,14 +14,25 @@ function App() {
     return (
         <Router>
             <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/resetpassword/:token" element={<ResetPassword />} />
+                <Route
+                    path="/resetpassword/:token"
+                    element={<ResetPassword />}
+                />
                 <Route path="/clientchat" element={<ClientChat />} />
-                <Route path="/dietitiondashboard" element={<DietitianDashboard />} />
+                <Route
+                    path="/dietitiondashboard"
+                    element={<DietitianDashboard />}
+                />
                 <Route path="/manageusers" element={<ManageUsers />} />
-                <Route path="/interactiveworkoutplanner" element={<InteractiveWorkoutPlanner />} />
+                <Route
+                    path="/interactiveworkoutplanner"
+                    element={<InteractiveWorkoutPlanner />}
+                />
             </Routes>
         </Router>
     );

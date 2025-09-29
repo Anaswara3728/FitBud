@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 
 // --- MOCK DATA (Can be replaced with props or API calls) ---
 const client = {
@@ -29,6 +30,54 @@ const initialConversation = [
 ];
 
 // --- Sub-components for better structure ---
+
+const AppHeader = () => (
+    <header className="flex items-center justify-between px-8 py-4 bg-gray-800 border-b border-gray-700 flex-shrink-0">
+        <div className="flex items-center space-x-4">
+            {/* Logo Placeholder */}
+            <div className="text-2xl">🏋️</div>
+            <h1 className="text-2xl font-bold text-white">FitTrack</h1>
+        </div>
+        <nav>
+            <ul className="flex items-center space-x-8 text-gray-300">
+                <li>
+                    <Link
+                        to="#"
+                        className="hover:text-indigo-400 transition-colors"
+                    >
+                        Overview
+                    </Link>
+                </li>
+                <li>
+                    <Link
+                        to="/interactiveworkoutplanner"
+                        className="hover:text-indigo-400 transition-colors"
+                    >
+                        Workouts
+                    </Link>
+                </li>
+                <li>
+                    <a
+                        href="#"
+                        className="hover:text-indigo-400 transition-colors"
+                    >
+                        Trends
+                    </a>
+                </li>
+                <li>
+                    {/* Active Link */}
+                    <a
+                        href="#"
+                        className="font-semibold text-indigo-400"
+                        aria-current="page"
+                    >
+                        Chat
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+);
 
 const ChatHeader = ({ dietitian }) => (
     <header className="flex items-center justify-between h-20 px-8 bg-gray-800 border-b border-gray-700 flex-shrink-0">
@@ -125,9 +174,9 @@ const ChatFooter = ({ onSendMessage }) => {
     );
 };
 
-// --- Main Chat Component ---
+// --- Main Page Component ---
 
-export default function Chat() {
+export default function DietChatPage() {
     const [conversation, setConversation] = useState(initialConversation);
     const chatEndRef = useRef(null);
 
@@ -152,8 +201,10 @@ export default function Chat() {
                 ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
             `}</style>
 
-            <div className="flex h-screen bg-gray-900">
-                <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+            <div className="flex flex-col h-screen bg-gray-900 text-gray-200">
+                <AppHeader />
+                {/* This main element now contains the chat interface */}
+                <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full overflow-hidden">
                     <ChatHeader dietitian={dietitian} />
                     <div className="flex-grow p-8 overflow-y-auto space-y-6">
                         <AnimatePresence>

@@ -33,7 +33,7 @@ router.post('/forgot-password', async (req, res) => {
     await transporter.sendMail({
       to: user.email,
       from: process.env.EMAIL_USER,
-      subject: 'FitBud Password Reset',
+      subject: 'FitTrack Password Reset',
       text: `You requested a password reset. Click the link below:\n\n${resetURL}\n\nIf you did not request this, ignore this email.`,
     });
 

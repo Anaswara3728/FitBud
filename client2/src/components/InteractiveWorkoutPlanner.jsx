@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 // --- DATA: Workouts for each muscle group ---
 const workoutData = {
@@ -69,6 +70,53 @@ const workoutData = {
     ],
     hands: ["Hand Grippers", "Plate Pinches"],
 };
+const AppHeader = () => (
+    <header className="flex items-center justify-between px-8 py-4 bg-gray-800 border-b border-gray-700 flex-shrink-0">
+        <div className="flex items-center space-x-4">
+            {/* Logo Placeholder */}
+            <div className="text-2xl">🏋️</div>
+            <h1 className="text-2xl font-bold text-white">FitTrack</h1>
+        </div>
+        <nav>
+            <ul className="flex items-center space-x-8 text-gray-300">
+                <li>
+                    <Link
+                        to="#"
+                        className="hover:text-indigo-400 transition-colors"
+                    >
+                        Overview
+                    </Link>
+                </li>
+                <li>
+                    {/* Active Link */}
+                    <Link
+                        to="/interactiveworkoutplanner"
+                        className="font-semibold text-indigo-400"
+                        aria-current="page"
+                    >
+                        Workouts
+                    </Link>
+                </li>
+                <li>
+                    <a
+                        href="#"
+                        className="hover:text-indigo-400 transition-colors"
+                    >
+                        Trends
+                    </a>
+                </li>
+                <li>
+                    <Link
+                        to="/clientchat"
+                        className="hover:text-indigo-400 transition-colors"
+                    >
+                        Chat
+                    </Link>
+                </li>
+            </ul>
+        </nav>
+    </header>
+);
 
 // Helper to format muscle ID for display
 const formatMuscleName = (id) => {
@@ -494,6 +542,7 @@ const InteractiveWorkoutPlanner = () => {
 
     return (
         <div className="bg-gray-800 text-white min-h-screen font-sans p-4 sm:p-6 md:p-8">
+            <AppHeader />
             <div className="max-w-7xl mx-auto">
                 <header className="text-center mb-8">
                     <h1 className="text-4xl sm:text-5xl font-bold text-red-500 tracking-tight">
