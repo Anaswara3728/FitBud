@@ -10,7 +10,7 @@ const Home = () => {
         <div className="flex flex-col h-screen bg-gray-900 text-white">
             <header className="flex items-center justify-between p-6 border-b border-gray-800">
                 <div className="flex items-center space-x-3">
-                    <span className="text-3xl">🍏</span>
+                    <span className="text-3xl">🏋️</span>
                     <h1 className="text-2xl font-bold">FitTrack</h1>
                 </div>
                 <button

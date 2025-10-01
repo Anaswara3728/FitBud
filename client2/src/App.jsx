@@ -9,7 +9,8 @@ import ClientChat from "./components/ClientChat";
 import DietitianDashboard from "./components/DietitianDashboard";
 import ManageUsers from "./components/ManageUsers";
 import InteractiveWorkoutPlanner from "./components/InteractiveWorkoutPlanner";
-
+import Overview from "./components/Overview";
+import Trends from "./components/Trends";
 function App() {
     return (
         <Router>
@@ -33,6 +34,8 @@ function App() {
                     path="/interactiveworkoutplanner"
                     element={<InteractiveWorkoutPlanner />}
                 />
+                <Route path="overview" element={<Overview />} />
+                <Route path="trends" element={<Trends />} />
             </Routes>
         </Router>
     );

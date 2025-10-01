@@ -42,7 +42,7 @@ const AppHeader = () => (
             <ul className="flex items-center space-x-8 text-gray-300">
                 <li>
                     <Link
-                        to="#"
+                        to="/overview"
                         className="hover:text-indigo-400 transition-colors"
                     >
                         Overview
@@ -58,7 +58,7 @@ const AppHeader = () => (
                 </li>
                 <li>
                     <a
-                        href="#"
+                        href="/trends"
                         className="hover:text-indigo-400 transition-colors"
                     >
                         Trends
