@@ -12,7 +12,7 @@ const AppHeader = () => (
             <ul className="flex items-center space-x-8 text-gray-300">
                 <li>
                     <Link
-                        to="/"
+                        to="/overview"
                         className="font-semibold text-indigo-400"
                         aria-current="page"
                     >

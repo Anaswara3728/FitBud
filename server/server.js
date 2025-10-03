@@ -5,6 +5,7 @@ import cors from "cors";
 import connectDB from "./db/connect.js";
 import authRoutes from "./routes/auth.js";
 import passwordRoutes from "./routes/password.js";
+import chatRoutes from "./routes/chat.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/password", passwordRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
