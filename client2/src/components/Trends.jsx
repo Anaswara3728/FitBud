@@ -91,7 +91,7 @@ const AppHeader = () => (
                 </li>
                 <li>
                     <Link
-                        to="/"
+                        to="/trends"
                         className="font-semibold text-indigo-400"
                         aria-current="page"
                     >

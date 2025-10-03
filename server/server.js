@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import passwordRoutes from "./routes/password.js";
 import overviewRoutes from "./routes/overviewRoutes.js";
 import workoutPlansRoutes from "./routes/workoutRoutes.js"; 
+import chatRoutes from "./routes/chat.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/password", passwordRoutes);
 app.use("/api", overviewRoutes);
 app.use("/api/workout-plans", workoutPlansRoutes); 
+app.use("/api/chat", chatRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
