@@ -1,201 +1,161 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 
-// --- STATIC DATA FOR TRENDS & ARTICLES ---
-const fitnessTrends = [
-    {
-        title: "The Rise of Wearable Technology in Fitness",
-        description:
-            "From smart rings tracking sleep to advanced watches monitoring HRV, wearable tech is providing deeper insights into recovery and daily activity.",
-        urlToImage:
-            "https://images.unsplash.com/photo-1579586337278-35d18b068f5b?q=80&w=800&auto=format&fit=crop",
-        url: "https://www.forbes.com/health/fitness/best-wearable-fitness-trackers/",
-        source: { name: "Forbes Health" },
-        author: "Alex Johnson",
-    },
-    {
-        title: "Mindful Movement: Combining Yoga and Pilates",
-        description:
-            "Hybrid classes combining yoga's flexibility with Pilates' core strength are gaining popularity for a holistic approach to wellness.",
-        urlToImage:
-            "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop",
-        url: "https://www.verywellfit.com/pilates-vs-yoga-which-is-better-for-you-5224888",
-        source: { name: "Verywell Fit" },
-        author: "Maria Garcia",
-    },
-];
+export default function Trends() {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-const nutritionArticles = [
-    {
-        title: "Understanding Macronutrients: Protein, Carbs, and Fats",
-        description:
-            "A deep dive into the role of macronutrients in your diet and how to balance them for optimal health and performance.",
-        urlToImage:
-            "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop",
-        url: "https://www.healthline.com/nutrition/how-to-count-macros",
-        source: { name: "Healthline" },
-        author: "Dr. Jane Doe",
-    },
-];
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const res = await fetch(
+          `https://newsapi.org/v2/top-headlines?category=health&language=en&pageSize=50&apiKey=34c62b78803545129ac776be5bfc48e3`
+        );
+        const data = await res.json();
+        console.log("✅ News API Response:", data);
 
-const wellnessArticles = [
-    {
-        title: "Strength Training for Longevity and Healthspan",
-        description:
-            "Recent studies highlight the critical role of resistance training for improving metabolic health, bone density, and overall longevity.",
-        urlToImage:
-            "https://images.unsplash.com/photo-1581009137042-c552e485697a?q=80&w=800&auto=format&fit=crop",
-        url: "https://www.health.harvard.edu/staying-healthy/strength-training-builds-more-than-muscles",
-        source: { name: "Harvard Health" },
-        author: "Dr. Emily White",
-    },
-];
+        if (data.status === "ok") {
+          setArticles(data.articles || []);
+        } else {
+          console.error("❌ News API error:", data);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching news:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-const healthStudies = [
-    {
-        title: "New Study Links Gut Health to Mental Well-being",
-        description:
-            "Researchers have found a stronger-than-ever correlation between gut microbiome diversity and mental health outcomes, including anxiety and depression.",
-        urlToImage:
-            "https://images.unsplash.com/photo-1599059813005-7282b954c33c?q=80&w=800&auto=format&fit=crop",
-        url: "https://www.medicalnewstoday.com/articles/gut-bacteria-and-mental-health-whats-the-link",
-        source: { name: "Medical News Today" },
-        author: "Science Daily",
-    },
-];
+    fetchArticles();
+  }, []);
 
-// --- App Header Component ---
-const AppHeader = () => (
-    <header className="flex items-center justify-between px-8 py-4 bg-gray-800 border-b border-gray-700 flex-shrink-0 sticky top-0 z-10">
-        <div className="flex items-center space-x-4">
-            <div className="text-2xl">🏋️</div>
-            <h1 className="text-2xl font-bold text-white">FitTrack</h1>
-        </div>
-        <nav className="hidden md:flex">
-            <ul className="flex items-center space-x-8 text-gray-300">
-                <li>
-                    <Link
-                        to="/overview"
-                        className="hover:text-indigo-400 transition-colors"
-                    >
-                        Overview
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        to="/interactiveworkoutplanner"
-                        className="hover:text-indigo-400 transition-colors"
-                    >
-                        Workouts
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        to="/trends"
-                        className="font-semibold text-indigo-400"
-                        aria-current="page"
-                    >
-                        Trends
-                    </Link>
-                </li>
-                <li>
-                    <Link
-                        to="/clientchat"
-                        className="hover:text-indigo-400 transition-colors"
-                    >
-                        Chat
-                    </Link>
-                </li>
-            </ul>
-        </nav>
-    </header>
-);
-
-// --- Trends Page Component ---
-function Trends() {
-    return (
-        <main className="p-4 sm:p-8 space-y-12 bg-gray-900 text-white min-h-full">
-            <h2 className="text-3xl font-bold mb-6">Health & Fitness Trends</h2>
-            <>
-                <Section title="Top Fitness Trends" articles={fitnessTrends} />
-                <Section title="Nutrition" articles={nutritionArticles} />
-                <Section title="Wellness" articles={wellnessArticles} />
-                <Section title="Health Studies" articles={healthStudies} />
-            </>
-        </main>
+  const classifyArticles = (articles) => {
+    const featured = articles.slice(0, 3); // Top 3 featured
+    const nutrition = articles.filter(
+      (a) =>
+        /nutrition|diet|food|weight|eating|meal|vitamin|protein/i.test(
+          a.title + " " + a.description
+        )
     );
+    const wellness = articles.filter(
+      (a) =>
+        /wellness|lifestyle|mental|fitness|exercise|yoga|sleep|stress/i.test(
+          a.title + " " + a.description
+        )
+    );
+    const studies = articles.filter(
+      (a) =>
+        /study|research|scientists|disease|cancer|covid|vaccine|medicine/i.test(
+          a.title + " " + a.description
+        )
+    );
+
+    return { featured, nutrition, wellness, studies };
+  };
+
+  const filteredArticles = articles.filter((article) => {
+    const title = article.title?.toLowerCase() || "";
+    const desc = article.description?.toLowerCase() || "";
+    const term = search.toLowerCase();
+    return title.includes(term) || desc.includes(term);
+  });
+
+  const { featured, nutrition, wellness, studies } = classifyArticles(
+    filteredArticles
+  );
+
+  return (
+    <div className="p-8 space-y-12">
+      <h2 className="text-3xl font-bold mb-6">Health Trends</h2>
+
+      {/* Search Bar */}
+      <div className="relative mb-8">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <input
+          type="text"
+          placeholder="Search Health Trends"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 rounded-lg bg-[#1e293b] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        />
+      </div>
+
+      {loading ? (
+        <p className="text-gray-400">Loading health news...</p>
+      ) : filteredArticles.length === 0 ? (
+        <p className="text-gray-400">No matching articles found.</p>
+      ) : (
+        <>
+          <Section title="Featured" articles={featured} highlight />
+          <Section title="Nutrition" articles={nutrition} />
+          <Section title="Wellness" articles={wellness} />
+          <Section title="Health Studies" articles={studies} />
+        </>
+      )}
+    </div>
+  );
 }
 
-function Section({ title, articles }) {
-    if (!articles || articles.length === 0) return null;
-    return (
-        <div className="space-y-6">
-            <h3 className="text-2xl font-semibold">{title}</h3>
-            <div className="flex flex-col space-y-6">
-                {articles.map((article, index) => (
-                    <ArticleCard
-                        key={`${title}-${index}-${article.url}`}
-                        article={article}
-                    />
-                ))}
-            </div>
-        </div>
-    );
+// Vertical Section Component
+function Section({ title, articles, highlight = false }) {
+  if (!articles || articles.length === 0) return null;
+
+  return (
+    <div className="space-y-6">
+      <h3 className="text-2xl font-semibold">{title}</h3>
+      <div className="flex flex-col space-y-6">
+        {articles.map((article, index) => (
+          <ArticleCard
+            key={`${title}-${index}`}
+            title={article.title}
+            desc={article.description || "No description available."}
+            img={article.urlToImage || "https://via.placeholder.com/400x300"}
+            url={article.url}
+            author={article.author}
+            source={article.source?.name}
+            highlight={highlight}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }
 
-function ArticleCard({ article }) {
-    const { title, description, urlToImage, url, author, source } = article;
-    return (
-        <a
+// Fixed height Article Card
+function ArticleCard({ title, desc, img, url, author, source }) {
+  return (
+    <div className="flex flex-col md:flex-row-reverse bg-[#1e293b] rounded-xl hover:bg-[#334155] transition overflow-hidden shadow-lg h-48 md:h-48">
+      {/* Image on the right with padding and fully rounded corners */}
+      <div className="flex-shrink-0 md:w-1/3 h-full p-3 flex items-center justify-center">
+        <img
+          src={img}
+          alt={title}
+          className="w-full h-full object-cover rounded-xl"
+        />
+      </div>
+
+      {/* Text content */}
+      <div className="p-4 flex flex-col flex-1 justify-between h-full">
+        <div>
+          <h4 className="font-semibold text-lg mb-2 line-clamp-2">{title}</h4>
+          <p className="text-gray-400 text-sm mb-2 line-clamp-3">{desc}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-xs mb-2">
+            {source && <span>📌 {source}</span>}{" "}
+            {author && <span>• ✍️ {author}</span>}
+          </p>
+          <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col md:flex-row bg-slate-800 rounded-xl hover:bg-slate-700 transition overflow-hidden shadow-lg group"
-        >
-            <div className="flex-shrink-0 md:w-1/3 h-48 md:h-auto">
-                <img
-                    src={
-                        urlToImage ||
-                        "https://placehold.co/400x300/1e293b/ffffff?text=News"
-                    }
-                    alt={title || "Article image"}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src =
-                            "https://placehold.co/400x300/1e293b/ffffff?text=News";
-                    }}
-                />
-            </div>
-            <div className="p-4 flex flex-col flex-1 justify-between">
-                <div>
-                    <h4 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-indigo-400 transition-colors">
-                        {title}
-                    </h4>
-                    <p className="text-gray-400 text-sm mb-2 line-clamp-3">
-                        {description || "No description available."}
-                    </p>
-                </div>
-                <div className="mt-4">
-                    <p className="text-gray-500 text-xs mb-2">
-                        {source?.name && <span>📌 {source.name}</span>}
-                        {author && <span> • ✍️ {author}</span>}
-                    </p>
-                    <span className="text-indigo-400 group-hover:underline text-sm font-semibold">
-                        Read full article →
-                    </span>
-                </div>
-            </div>
-        </a>
-    );
-}
-
-// Default export is the combined page layout
-export default function TrendsPage() {
-    return (
-        <div className="bg-gray-900 min-h-screen">
-            <AppHeader />
-            <Trends />
+            className="text-blue-400 hover:underline text-sm"
+          >
+            Read full article →
+          </a>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
