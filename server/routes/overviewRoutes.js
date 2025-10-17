@@ -4,7 +4,8 @@ import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/overview', authMiddleware, getOverview);
-router.get('/workouts', authMiddleware, getRecentWorkouts);
+router.get('/', authMiddleware, getOverview);  
+router.get('/recent', authMiddleware, getRecentWorkouts);  
+
 
 export default router;

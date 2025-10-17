@@ -1,4 +1,3 @@
-// server/routes/password.js
 import express from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
@@ -7,29 +6,29 @@ import User from '../models/user.js';
 
 const router = express.Router();
 
-// FORGOT PASSWORD
+
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "Email not found" });
 
-    // Generate token
+    
     const token = crypto.randomBytes(20).toString('hex');
     user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    user.resetPasswordExpires = Date.now() + 3600000; 
     await user.save();
 
-    // Configure nodemailer
+    
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // use App Password for Gmail
+        pass: process.env.EMAIL_PASS, 
       },
     });
 
-    // Send email with path param link
+    
     const resetURL = `${process.env.BASE_URL}/resetpassword/${token}`;
 
     await transporter.sendMail({
@@ -45,13 +44,13 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// RESET PASSWORD
+
 router.post('/resetpassword/:token', async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
 
-    // Find user by token and check expiration
+    
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() },

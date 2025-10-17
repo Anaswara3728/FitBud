@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const clients = [
+const clientsList = [
     { id: 1, name: "Alice Johnson", status: "online" },
     { id: 2, name: "Bob Smith", status: "offline" },
     { id: 3, name: "Charlie Brown", status: "online" },
@@ -11,47 +11,55 @@ export default function DietitianDashboard() {
     const [activeClient, setActiveClient] = useState(null);
     const [messages, setMessages] = useState({});
     const [newMessage, setNewMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
     const chatEndRef = useRef(null);
+
+    // Fetch messages when active client changes
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (!activeClient) return;
+            try {
+                const res = await fetch(
+                    `http://localhost:4000/api/chat/${activeClient.id}`
+                );
+                const data = await res.json();
+                setMessages((prev) => ({
+                    ...prev,
+                    [activeClient.id]: data.messages || [],
+                }));
+            } catch (err) {
+                console.error("Fetch messages error:", err);
+            }
+        };
+        fetchMessages();
+    }, [activeClient]);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    }, [messages, activeClient]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !activeClient) return;
 
-        const dietitianMsg = { sender: "dietitian", text: newMessage };
+        const msg = {
+            sender: "dietitian",
+            text: newMessage,
+            clientId: activeClient.id,
+        };
         setMessages((prev) => ({
             ...prev,
-            [activeClient.id]: [...(prev[activeClient.id] || []), dietitianMsg],
+            [activeClient.id]: [...(prev[activeClient.id] || []), msg],
         }));
         setNewMessage("");
 
-        setIsLoading(true);
         try {
-            const res = await fetch("http://localhost:4000/api/chat/message", {
+            await fetch("http://localhost:4000/api/chat/message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: newMessage }),
+                body: JSON.stringify(msg),
             });
-            const data = await res.json();
-
-            if (data.reply) {
-                const aiMsg = { sender: "ai", text: data.reply };
-                setMessages((prev) => ({
-                    ...prev,
-                    [activeClient.id]: [
-                        ...(prev[activeClient.id] || []),
-                        aiMsg,
-                    ],
-                }));
-            }
         } catch (err) {
-            console.error("Chat Error:", err);
-        } finally {
-            setIsLoading(false);
+            console.error("Send message error:", err);
         }
     };
 
@@ -60,7 +68,7 @@ export default function DietitianDashboard() {
             {/* Sidebar */}
             <div className="w-1/4 bg-white border-r overflow-y-auto">
                 <div className="p-4 font-bold text-lg border-b">Clients</div>
-                {clients.map((client) => (
+                {clientsList.map((client) => (
                     <div
                         key={client.id}
                         onClick={() => setActiveClient(client)}
@@ -115,9 +123,7 @@ export default function DietitianDashboard() {
                                                 className={`px-4 py-2 rounded-2xl max-w-xs ${
                                                     msg.sender === "dietitian"
                                                         ? "bg-blue-500 text-white rounded-br-none"
-                                                        : msg.sender === "ai"
-                                                          ? "bg-green-200 text-black rounded-bl-none"
-                                                          : "bg-gray-300 text-black rounded-bl-none"
+                                                        : "bg-gray-300 text-black rounded-bl-none"
                                                 }`}
                                             >
                                                 {msg.text}
@@ -143,10 +149,9 @@ export default function DietitianDashboard() {
                             />
                             <button
                                 type="submit"
-                                disabled={isLoading}
                                 className="bg-blue-600 text-white px-4 py-2 rounded-full"
                             >
-                                {isLoading ? "..." : "Send"}
+                                Send
                             </button>
                         </form>
                     </>

@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   },
   userType: {
     type: String,
-    enum: ['admin', 'user', 'dietician'],
+    enum: ['admin', 'user', 'dietitian'],
     default: 'user'
   },
   resetPasswordToken: String,      

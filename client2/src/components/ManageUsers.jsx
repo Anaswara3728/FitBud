@@ -10,7 +10,7 @@ const initialPendingUsers = [
         role: "User",
         status: "Pending Approval",
     },
-    {
+    { 
         id: 2,
         name: "Jane Smith",
         email: "jane.smith@nutrition.co",

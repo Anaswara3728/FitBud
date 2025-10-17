@@ -1,11 +1,26 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function ClientChat() {
+export default function ClientChat({ clientId }) {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
     const chatEndRef = useRef(null);
+
+    // Fetch messages on mount
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const res = await fetch(
+                    `http://localhost:4000/api/chat/${clientId}`
+                );
+                const data = await res.json();
+                setMessages(data.messages || []);
+            } catch (err) {
+                console.error("Fetch messages error:", err);
+            }
+        };
+        if (clientId) fetchMessages();
+    }, [clientId]);
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -15,27 +30,18 @@ export default function ClientChat() {
         e.preventDefault();
         if (!newMessage.trim()) return;
 
-        const clientMsg = { sender: "client", text: newMessage };
-        setMessages((prev) => [...prev, clientMsg]);
+        const msg = { sender: "client", text: newMessage, clientId };
+        setMessages((prev) => [...prev, msg]);
         setNewMessage("");
 
-        setIsLoading(true);
         try {
-            const res = await fetch("http://localhost:4000/api/chat/message", {
+            await fetch("http://localhost:4000/api/chat/message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: newMessage }),
+                body: JSON.stringify(msg),
             });
-            const data = await res.json();
-
-            if (data.reply) {
-                const dietitianMsg = { sender: "dietitian", text: data.reply };
-                setMessages((prev) => [...prev, dietitianMsg]);
-            }
         } catch (err) {
-            console.error("Chat Error:", err);
-        } finally {
-            setIsLoading(false);
+            console.error("Send message error:", err);
         }
     };
 
@@ -90,10 +96,9 @@ export default function ClientChat() {
                 />
                 <button
                     type="submit"
-                    disabled={isLoading}
                     className="bg-blue-600 text-white px-4 py-2 rounded-full"
                 >
-                    {isLoading ? "..." : "Send"}
+                    Send
                 </button>
             </form>
         </div>
