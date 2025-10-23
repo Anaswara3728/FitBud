@@ -1,10 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function AppHeader() {
   return (
     <header className="flex justify-between items-center px-8 py-4 bg-[#0f172a] shadow">
-      <h1 className="text-2xl font-bold text-white">FitTrack</h1>
+      {/* Logo + Title */}
+      <div className="flex items-center space-x-3">
+        <svg
+          className="w-10 h-10 text-indigo-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          ></path>
+        </svg>
+        <h1 className="text-2xl font-bold text-white">FitTrack</h1>
+      </div>
+
+      {/* Navigation */}
       <nav className="hidden md:flex">
         <ul className="flex items-center space-x-8 text-gray-300">
           <li>
@@ -50,6 +68,7 @@ function OverviewContent() {
   const [stats, setStats] = useState(null);
   const [recentWorkouts, setRecentWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOverviewData = async () => {
@@ -57,17 +76,34 @@ function OverviewContent() {
         const token = localStorage.getItem("token");
         if (!token) {
           console.error("No token found!");
+          navigate("/login");
           return;
         }
 
         const res1 = await fetch("http://localhost:4000/api/overview", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!res1.ok) {
+          if (res1.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login");
+            return;
+          }
+          throw new Error(`Overview request failed: ${res1.status}`);
+        }
         const overviewData = await res1.json();
 
         const res2 = await fetch("http://localhost:4000/api/overview/recent", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!res2.ok) {
+          if (res2.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login");
+            return;
+          }
+          throw new Error(`Recent workouts request failed: ${res2.status}`);
+        }
         const workoutsData = await res2.json();
 
         setStats(overviewData);

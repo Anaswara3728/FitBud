@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
 
 const workoutData = {
   traps: ["Barbell Shrugs", "Dumbbell Shrugs", "Face Pulls", "Upright Rows"],
@@ -20,22 +22,69 @@ const workoutData = {
   hands: ["Hand Grippers", "Plate Pinches"],
 };
 
-const AppHeader = () => (
-  <header className="flex items-center justify-between px-8 py-4 bg-gray-800 border-b border-gray-700 flex-shrink-0">
-    <div className="flex items-center space-x-4">
-      <div className="text-2xl">🏋</div>
-      <h1 className="text-2xl font-bold text-white">FitTrack</h1>
-    </div>
-    <nav>
-      <ul className="flex items-center space-x-8 text-gray-300">
-        <li><a href="#overview" className="hover:text-indigo-400 transition-colors">Overview</a></li>
-        <li><a href="#workouts" className="font-semibold text-indigo-400">Workouts</a></li>
-        <li><a href="#trends" className="hover:text-indigo-400 transition-colors">Trends</a></li>
-        <li><a href="#chat" className="hover:text-indigo-400 transition-colors">Chat</a></li>
-      </ul>
-    </nav>
-  </header>
-);
+function AppHeader() {
+  return (
+    <header className="flex justify-between items-center px-8 py-4 bg-[#0f172a] shadow">
+      {/* Logo + Title */}
+      <div className="flex items-center space-x-3">
+        <svg
+          className="w-10 h-10 text-indigo-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          ></path>
+        </svg>
+        <h1 className="text-2xl font-bold text-white">FitTrack</h1>
+      </div>
+
+      {/* Navigation */}
+      <nav className="hidden md:flex">
+        <ul className="flex items-center space-x-8 text-gray-300">
+          <li>
+            <Link
+              to="/overview"
+              className="font-semibold text-indigo-400"
+              aria-current="page"
+            >
+              Overview
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/interactiveworkoutplanner"
+              className="hover:text-indigo-400 transition-colors"
+            >
+              Workouts
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/trends"
+              className="hover:text-indigo-400 transition-colors"
+            >
+              Trends
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/clientchat"
+              className="hover:text-indigo-400 transition-colors"
+            >
+              Chat
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </header>
+  );
+}
+
 
 const formatMuscleName = (id) => {
   if (!id) return "None";

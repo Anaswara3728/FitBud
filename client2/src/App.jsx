@@ -50,9 +50,9 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/resetpassword/:token" element={<ResetPassword />} />
-          <Route path="/clientchat" element={<ClientChat />} />
+          <Route path="/clientchat" element={<ClientChat clientId={1} />} />
           <Route path="/dietitiondashboard" element={<DietitianDashboard />} />
-          <Route path="/manageusers" element={<ManageUsers />} />
+          <Route path="/admindashboard" element={<ManageUsers />} />
           <Route path="/interactiveworkoutplanner" element={<InteractiveWorkoutPlanner />} />
           <Route path="/overview" element={<Overview />} />
           <Route path="/trends" element={<Trends />} />

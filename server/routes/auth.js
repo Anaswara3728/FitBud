@@ -17,13 +17,13 @@ router.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
-      fullname,
-      email,
-      password: hashedPassword,
-      userType
-    });
-
-    await user.save();
+  fullname,
+  email,
+  password: hashedPassword,
+  userType,
+  status: "Pending", 
+});
+await user.save();
 
     res.status(201).json({ message: "User registered successfully", user });
   } catch (err) {
@@ -45,9 +45,9 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // ✅ Generate JWT
+    // Generate JWT
     const token = jwt.sign(
-      { id: user._id, role: user.userType },
+      { id: user._id, userType: user.userType }, // Changed 'role' to 'userType'
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -59,7 +59,8 @@ router.post('/login', async (req, res) => {
         id: user._id,
         fullname: user.fullname,
         email: user.email,
-        userType: user.userType
+        userType: user.userType,
+        status: user.status // Include status
       }
     });
   } catch (err) {

@@ -1,38 +1,59 @@
-import fetch from "node-fetch";
+import Chat from '../models/chat.js';
+
+export const getMessages = async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        
+        let chat = await Chat.findOne({ clientId });
+        
+        if (!chat) {
+            chat = new Chat({ clientId, messages: [] });
+            await chat.save();
+        }
+        
+        res.json({ messages: chat.messages });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
 
 export const sendMessage = async (req, res) => {
-  const { message } = req.body;
+    try {
+        const { clientId, sender, text } = req.body;
+        
+        if (!clientId || !sender || !text) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+        
+        let chat = await Chat.findOne({ clientId });
+        
+        if (!chat) {
+            chat = new Chat({ clientId, messages: [] });
+        }
+        
+        chat.messages.push({ sender, text, clientId });
+        await chat.save();
+        
+        res.status(201).json({ message: 'Message sent', chat });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
 
-  if (!message) {
-    return res.status(400).json({ error: "Message is required" });
-  }
-
-  try {
-    const apiKey = process.env.GEMINI_API_KEY; // store securely in .env
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-    const payload = {
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `As a dietitian, give a helpful response to: "${message}"` }],
-        },
-      ],
-    };
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text 
-      || "Sorry, I couldn’t generate a response.";
-
-    res.json({ reply });
-  } catch (err) {
-    console.error("Gemini API Error:", err);
-    res.status(500).json({ error: "AI response failed" });
-  }
+export const markAsRead = async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        
+        await Chat.updateOne(
+            { clientId },
+            { $set: { "messages.$[].read": true } }
+        );
+        
+        res.json({ message: 'Messages marked as read' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
 };

@@ -1,29 +1,17 @@
-import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({
-  fullname: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6
-  },
-  userType: {
-    type: String,
-    enum: ['admin', 'user', 'dietitian'],
-    default: 'user'
-  },
-  resetPasswordToken: String,      
-  resetPasswordExpires: Date
-}, { timestamps: true });
+import mongoose from "mongoose";
 
-export default mongoose.model('User', userSchema);
+const userSchema = new mongoose.Schema(
+  {
+    fullname: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    userType: { type: String, enum: ["user", "dietitian", "admin"], default: "user" },
+    status: { type: String, enum: ["Pending", "Approved", "Denied"], default: "Pending" },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date }
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("User", userSchema);
